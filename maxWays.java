@@ -222,32 +222,17 @@ public class maxWays{
         return dist[dest] >= 0;
       }
     
-    //   static boolean dinicBfs(List<Edge>[] graph, int src, int dest, int[] dist) {
-    //     Arrays.fill(dist, -1);
-    //     dist[src] = 0;
-    //     int[] Q = new int[graph.length];
-    //     int sizeQ = 0;
-    //     Q[sizeQ++] = src;
-    //     for (int i = 0; i < sizeQ; i++) {
-    //       int u = Q[i];
-    //       for (Edge e : graph[u]) {
-    //         if (dist[e.t] < 0 && e.f < e.cap) {
-    //           dist[e.t] = dist[u] + 1;
-    //           Q[sizeQ++] = e.t;
-    //         }
-    //       }
-    //     }
-    //     return dist[dest] >= 0;
-    //   }
     
 
-      static int dinicDfs(buildFork graph, int[] ptr, int[] dist, int dest, int u, int f) {
+      static int dinicDfs(buildFork graph, int[] ptr, int[] dist, int dest, int u, int f, List listCaminho) {
+        
+        listCaminho.add(u);
         if (u == dest)
           return f;
         for (; ptr[u] < graph.getVertice(u).size(); ++ptr[u]) {
           Aresta e = graph.getVertice(u).get(ptr[u]);
           if (dist[e.getDestino()] == dist[u] + 1 && e.getF() < e.getFluxo()) {
-            int df = dinicDfs(graph, ptr, dist, dest, e.getDestino(), Math.min(f, e.getFluxo() - e.getF()));
+            int df = dinicDfs(graph, ptr, dist, dest, e.getDestino(), Math.min(f, e.getFluxo() - e.getF()), listCaminho);
             if (df > 0) {
               e.setF(e.getF() + df);
               graph.getAresta(e.getDestino(), e.getFluxo()).setF(graph.getAresta(e.getDestino(), e.getFluxo()).getF() - df);
@@ -260,13 +245,35 @@ public class maxWays{
     
       public static int maxFlow(buildFork graph, int src, int dest) {
         int flow = 0;
+        List<Integer> flowList = new ArrayList<Integer>();
         int[] dist = new int[graph.getVerticeSize()];
         while (dinicBfs(graph, src, dest, dist)) {
           int[] ptr = new int[graph.getVerticeSize()];
           while (true) {
-            int df = dinicDfs(graph, ptr, dist, dest, src, Integer.MAX_VALUE);
-            if (df == 0)
-              break;
+            int df = dinicDfs(graph, ptr, dist, dest, src, Integer.MAX_VALUE, flowList);
+
+            if (df == 0){
+
+                break;
+            }
+            else{
+
+                for(int i = 0; i < flowList.size(); i++){
+
+                    if(i == 0){
+
+                        System.out.print("Caminho: "+flowList.get(i));
+                    }
+                    else{
+                        
+                        System.out.print(" => " + flowList.get(i));
+                    }
+                }
+    
+                flowList.clear();
+                System.out.println("");
+            }
+            
             flow += df;
           }
         }
@@ -278,14 +285,7 @@ public class maxWays{
         String namePathFork = "./grafo.txt";
         //construir grafo
         buildFork fork = lerArquivoTxt(namePathFork);
-        fork.printFork();
 
-        // buildFork graph = new buildFork(3, 10);
-        // addEdge(graph, 0, 1, 1);
-        // addEdge(graph, 0, 2, 1);
-        // addEdge(graph, 1, 2, 1);
-        // System.out.println(maxFlow(graph, 0, 2));
-
-        System.out.println(maxFlow(fork, 0, 3));
+        System.out.println(maxFlow(fork, 0, 5));
     }
 }
